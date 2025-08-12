@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql-db:
+    image: mysql:8.0
+    container_name: card-mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: cardmanagementdb
+      MYSQL_ROOT_PASSWORD: Dhaval@3679
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Dhaval@369
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      - card-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+      interval: 30s
+
+  # Card Service Application
+  card-service:
+    build: .
+    container_name: card-service-app
+    restart: always
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/cardmanagementdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Dhaval@3679
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+      EUREKA_CLIENT_FETCH_REGISTRY: false
+      SPRING_CLOUD_CONFIG_ENABLED: false
+    ports:
+      - "8080:8080"
+    networks:
+      - card-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Optional: Eureka Server (if you want to use service discovery)
+  eureka-server:
+    image: steeltoeoss/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - card-network
+    profiles:
+      - eureka  # Only starts when --profile eureka is specified
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer
+    container_name: adminer-db-manager
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - card-network
+    profiles:
+      - admin  # Only starts when --profile admin is specified
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  card-network:
+    driver: bridge
