@@ -1,0 +1,307 @@
+{
+    "info": {
+        "name": "Payment Service API Collection",
+        "description": "Complete API documentation and testing collection for Card Management Payment Service",
+        "version": "1.0.0",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8083"
+        }
+    ],
+    "item": [
+        {
+            "name": "Payment Operations",
+            "item": [
+                {
+                    "name": "Process Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cardId\": 1,\n    \"userId\": 1,\n    \"amount\": 150.75,\n    \"transactionType\": \"DEBIT\",\n    \"merchantName\": \"Amazon\",\n    \"description\": \"Online shopping purchase\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments"]
+                        },
+                        "description": "Create a new payment transaction. Supports DEBIT, CREDIT, and REFUND transaction types."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Payment by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "1"]
+                        },
+                        "description": "Retrieve a specific payment by its ID"
+                    }
+                },
+                {
+                    "name": "Get Payment by Transaction ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/transaction/TXN_AMZ001",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "transaction", "TXN_AMZ001"]
+                        },
+                        "description": "Retrieve a payment by its unique transaction ID"
+                    }
+                },
+                {
+                    "name": "Update Payment Status",
+                    "request": {
+                        "method": "PUT",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/1/status?status=SUCCESS",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "1", "status"],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "SUCCESS",
+                                    "description": "New status: PENDING, SUCCESS, or FAILED"
+                                }
+                            ]
+                        },
+                        "description": "Update the status of an existing payment"
+                    }
+                },
+                {
+                    "name": "Delete Payment",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "1"]
+                        },
+                        "description": "Delete a payment record by ID"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Query Operations",
+            "item": [
+                {
+                    "name": "Get All Payments",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments"]
+                        },
+                        "description": "Retrieve all payment records"
+                    }
+                },
+                {
+                    "name": "Get Payments by Card ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/card/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "card", "1"]
+                        },
+                        "description": "Get all payments associated with a specific card ID"
+                    }
+                },
+                {
+                    "name": "Get Payments by User ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/user/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "user", "1"]
+                        },
+                        "description": "Get all payments for a specific user"
+                    }
+                },
+                {
+                    "name": "Get Payments by Card and User",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/card/1/user/1",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "card", "1", "user", "1"]
+                        },
+                        "description": "Get payments filtered by both card ID and user ID"
+                    }
+                },
+                {
+                    "name": "Get Payments by Status",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/status/SUCCESS",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "status", "SUCCESS"]
+                        },
+                        "description": "Filter payments by status (PENDING, SUCCESS, FAILED)"
+                    }
+                },
+                {
+                    "name": "Get Payments by Transaction Type",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/type/DEBIT",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "type", "DEBIT"]
+                        },
+                        "description": "Filter payments by transaction type (DEBIT, CREDIT, REFUND)"
+                    }
+                },
+                {
+                    "name": "Get Payments by Merchant",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/merchant/Amazon",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "merchant", "Amazon"]
+                        },
+                        "description": "Search payments by merchant name (partial match supported)"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Date Range Queries",
+            "item": [
+                {
+                    "name": "Get Payments by Card and Date Range",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/card/1/daterange?startDate=2025-01-01T00:00:00&endDate=2025-12-31T23:59:59",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "card", "1", "daterange"],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2025-01-01T00:00:00",
+                                    "description": "Start date in ISO format"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2025-12-31T23:59:59",
+                                    "description": "End date in ISO format"
+                                }
+                            ]
+                        },
+                        "description": "Get payments for a specific card within a date range"
+                    }
+                },
+                {
+                    "name": "Get Payments by User and Date Range",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments/user/1/daterange?startDate=2025-01-01T00:00:00&endDate=2025-12-31T23:59:59",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments", "user", "1", "daterange"],
+                            "query": [
+                                {
+                                    "key": "startDate",
+                                    "value": "2025-01-01T00:00:00"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2025-12-31T23:59:59"
+                                }
+                            ]
+                        },
+                        "description": "Get payments for a specific user within a date range"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Sample Test Data",
+            "item": [
+                {
+                    "name": "Create DEBIT Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cardId\": 1,\n    \"userId\": 1,\n    \"amount\": 89.99,\n    \"transactionType\": \"DEBIT\",\n    \"merchantName\": \"Starbucks\",\n    \"description\": \"Coffee and breakfast\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create CREDIT Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cardId\": 2,\n    \"userId\": 2,\n    \"amount\": 250.00,\n    \"transactionType\": \"CREDIT\",\n    \"merchantName\": \"Salary Deposit\",\n    \"description\": \"Monthly salary credit\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments"]
+                        }
+                    }
+                },
+                {
+                    "name": "Create REFUND Payment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"cardId\": 1,\n    \"userId\": 1,\n    \"amount\": 45.50,\n    \"transactionType\": \"REFUND\",\n    \"merchantName\": \"Best Buy\",\n    \"description\": \"Product return refund\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/payments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "payments"]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
