@@ -1,0 +1,135 @@
+{
+  "info": {
+    "name": "Card Service API",
+    "description": "Complete API collection for Card Management Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create Card",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cardNumber\": \"1111222233334444\",\n  \"cardHolderName\": \"Alice Wonder\",\n  \"customerId\": 1004,\n  \"cardType\": \"CREDIT\",\n  \"expiryDate\": \"08/28\",\n  \"cvv\": \"321\",\n  \"creditLimit\": 60000.00,\n  \"availableBalance\": 60000.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cards",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards"]
+        }
+      }
+    },
+    {
+      "name": "2. Get All Cards",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards"]
+        }
+      }
+    },
+    {
+      "name": "3. Get Card by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "1"]
+        }
+      }
+    },
+    {
+      "name": "4. Get Card by Number",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/number/1234567890123456",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "number", "1234567890123456"]
+        }
+      }
+    },
+    {
+      "name": "5. Get Cards by Customer ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/customer/1001",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "customer", "1001"]
+        }
+      }
+    },
+    {
+      "name": "6. Update Card",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cardNumber\": \"1234567890123456\",\n  \"cardHolderName\": \"John Doe Updated\",\n  \"customerId\": 1001,\n  \"cardType\": \"CREDIT\",\n  \"expiryDate\": \"12/26\",\n  \"cvv\": \"123\",\n  \"creditLimit\": 55000.00,\n  \"availableBalance\": 50000.00\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "1"]
+        }
+      }
+    },
+    {
+      "name": "7. Block Card",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/1/block",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "1", "block"]
+        }
+      }
+    },
+    {
+      "name": "8. Activate Card",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/1/activate",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "1", "activate"]
+        }
+      }
+    },
+    {
+      "name": "9. Delete Card",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/cards/2",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "cards", "2"]
+        }
+      }
+    }
+  ]
+}
