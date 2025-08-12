@@ -1,0 +1,72 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        # User Service Routes
+        - id: user-service-route
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - RewritePath=/api/users/(?<segment>.*), /api/users/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+            - AddResponseHeader=X-Response-Gateway, api-gateway
+
+        # Card Service Routes
+        - id: card-service-route
+          uri: lb://card-service
+          predicates:
+            - Path=/api/cards/**
+          filters:
+            - RewritePath=/api/cards/(?<segment>.*), /api/cards/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+            - AddResponseHeader=X-Response-Gateway, api-gateway
+
+        # Transaction Service Routes
+        - id: transaction-service-route
+          uri: lb://transaction-service
+          predicates:
+            - Path=/api/transactions/**
+          filters:
+            - RewritePath=/api/transactions/(?<segment>.*), /api/transactions/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+
+        # Payment Service Routes
+        - id: payment-service-route
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api/payments/(?<segment>.*), /api/payments/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+
+        # Notification Service Routes
+        - id: notification-service-route
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api/notifications/(?<segment>.*), /api/notifications/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+
+        # Fraud Detection Service Routes
+        - id: fraud-detection-service-route
+          uri: lb://fraud-detection-service
+          predicates:
+            - Path=/api/fraud/**
+          filters:
+            - RewritePath=/api/fraud/(?<segment>.*), /api/fraud/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+
+        # Authentication Routes
+        - id: auth-routes
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /api/users/${segment}
+            - AddRequestHeader=X-Gateway-Name, api-gateway
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=X-Response-Default-Foo, Default-Bar
