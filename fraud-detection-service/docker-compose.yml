@@ -1,0 +1,161 @@
+
+version: '3.8'
+
+services:
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper-fraud
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - fraud-network
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'ruok' | nc localhost 2181 | grep imok"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka-fraud
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      - KAFKA_ENABLE_KRAFT=no
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper-fraud:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka-fraud:9092,EXTERNAL://localhost:9093
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_CFG_DEFAULT_REPLICATION_FACTOR=1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    networks:
+      - fraud-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  mysql-fraud:
+    image: mysql:8.0
+    container_name: mysql-fraud
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=Dhaval@3679
+      - MYSQL_DATABASE=cardmanagementdb
+      - MYSQL_USER=fraud_service
+      - MYSQL_PASSWORD=fraud_pass
+    volumes:
+      - mysql-fraud-data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+    networks:
+      - fraud-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pDhaval@3679"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Kafka UI for easy management (Optional - Remove if not needed)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-fraud
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=fraud-cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka-fraud:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper-fraud:2181
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - fraud-network
+
+  fraud-detection-service:
+    build: .
+    container_name: fraud-detection-service
+    ports:
+      - "8021:8021"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-fraud:3306/cardmanagementdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Dhaval@3679
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-fraud:9092
+      - SPRING_CLOUD_CONFIG_ENABLED=false
+      - SPRING_CLOUD_CONFIG_IMPORT_CHECK_ENABLED=false
+      - EUREKA_CLIENT_ENABLED=false
+      - KAFKA_TOPIC_TRANSACTION=transaction-events
+      - KAFKA_TOPIC_FRAUD_ALERT=fraud-alerts
+    depends_on:
+      mysql-fraud:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - fraud-network
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8021/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+volumes:
+  mysql-fraud-data:
+    driver: local
+
+networks:
+  fraud-network:
+    driver: bridge
+
+---
+
+# Commands to run:
+
+# 1. Build your Spring Boot application first
+# mvn clean package -DskipTests
+
+# 2. Start all services
+# docker-compose up --build -d
+
+# 3. Check service status
+# docker-compose ps
+
+# 4. View logs
+# docker-compose logs -f fraud-detection-service
+# docker-compose logs -f kafka-fraud
+
+# 5. Test Kafka connection
+# docker exec kafka-fraud kafka-topics --list --bootstrap-server localhost:9092
+
+# 6. Create Kafka topics manually (if needed)
+# docker exec kafka-fraud kafka-topics --create --topic transaction-events --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+# docker exec kafka-fraud kafka-topics --create --topic fraud-alerts --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
+
+# 7. Test application health
+# curl http://localhost:8021/actuator/health
+
+# 8. Access Kafka UI (if enabled)
+# Open browser: http://localhost:8080
+
+# 9. Stop all services
+# docker-compose down
+
+# 10. Stop and remove volumes (for fresh start)
+# docker-compose down -v

@@ -1,0 +1,61 @@
+# application-docker.yml
+spring:
+  datasource:
+    url: jdbc:mysql://mysql-fraud:3306/cardmanagementdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+  kafka:
+    bootstrap-servers: kafka-fraud:9092
+
+---
+# schema.sql
+CREATE DATABASE IF NOT EXISTS cardmanagementdb;
+USE cardmanagementdb;
+
+CREATE TABLE IF NOT EXISTS transactions (
+id BIGINT AUTO_INCREMENT PRIMARY KEY,
+card_number VARCHAR(20) NOT NULL,
+merchant_id VARCHAR(50) NOT NULL,
+amount DECIMAL(10,2) NOT NULL,
+transaction_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+location VARCHAR(100),
+transaction_type VARCHAR(20) DEFAULT 'PURCHASE',
+status VARCHAR(20) DEFAULT 'PENDING',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS fraud_alerts (
+id BIGINT AUTO_INCREMENT PRIMARY KEY,
+transaction_id BIGINT NOT NULL,
+alert_type VARCHAR(50) NOT NULL,
+risk_score DECIMAL(3,2) NOT NULL,
+reason TEXT,
+status VARCHAR(20) DEFAULT 'OPEN',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (transaction_id) REFERENCES transactions(id)
+);
+
+CREATE TABLE IF NOT EXISTS card_profiles (
+id BIGINT AUTO_INCREMENT PRIMARY KEY,
+card_number VARCHAR(20) NOT NULL UNIQUE,
+daily_limit DECIMAL(10,2) DEFAULT 5000.00,
+monthly_limit DECIMAL(12,2) DEFAULT 50000.00,
+usual_locations TEXT,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+---
+# data.sql
+USE cardmanagementdb;
+
+INSERT IGNORE INTO card_profiles (card_number, daily_limit, monthly_limit, usual_locations) VALUES
+('1234567890123456', 3000.00, 30000.00, 'Mumbai,Surat,Ahmedabad'),
+('2345678901234567', 5000.00, 50000.00, 'Delhi,Gurgaon,Noida'),
+('3456789012345678', 2000.00, 25000.00, 'Bangalore,Chennai,Hyderabad');
+
+INSERT IGNORE INTO transactions (card_number, merchant_id, amount, location, transaction_type, status) VALUES
+('1234567890123456', 'MERCHANT001', 1500.00, 'Mumbai', 'PURCHASE', 'COMPLETED'),
+('1234567890123456', 'MERCHANT002', 2500.00, 'Surat', 'PURCHASE', 'COMPLETED'),
+('2345678901234567', 'MERCHANT003', 800.00, 'Delhi', 'PURCHASE', 'COMPLETED'),
+('3456789012345678', 'MERCHANT001', 1200.00, 'Bangalore', 'PURCHASE', 'COMPLETED');
